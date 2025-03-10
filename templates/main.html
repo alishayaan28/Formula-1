@@ -133,7 +133,7 @@
     
     <div class="content-area">
         <div id="login-box" hidden="true">
-            <!-- Login form -->
+            <!-- Login form with no heading -->
             <div class="form-field">
                 <label for="email">Email:</label>
                 <input type="email" name="" id="email">
@@ -162,6 +162,6 @@
         {% if error_message %}
             <div class="error-display">{{ error_message }}</div>
         {% endif %}
-
+    {% endif %} 
 </body>
 </html>
