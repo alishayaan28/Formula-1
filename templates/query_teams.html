@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Query Drivers</title>
+    <title>Query Teams</title>
     <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
     <style>
         body {
@@ -311,7 +311,7 @@
                 <i class="fas fa-users"></i> Team
             </a>
             <a href="/query-drivers" class="nav-link">
-                <i class="fas fa-search"></i> Query
+                <i class="fas fa-search"></i> Query Drivers
             </a>
             <a href="/query-teams" class="nav-link">
                 <i class="fas fa-search"></i> Query Teams
@@ -323,13 +323,13 @@
     </div>
     
     <div class="content-area">
-        <h1 class="page-title">Query Drivers</h1>
+        <h1 class="page-title">Query Teams</h1>
         
         <div class="query-container">
             <div class="query-form">
                 <h2 class="form-title">Select Query Criteria</h2>
                 
-                <form method="POST" action="/query-drivers">
+                <form method="POST" action="/query-teams">
                     <div class="form-group">
                         <div class="form-field">
                             <label for="attribute">Select Attribute</label>
@@ -372,7 +372,7 @@
             <div class="results-container">
                 <h2 class="results-title">
                     Query Results
-                    <span class="results-count">{{ results|length }} driver(s) found</span>
+                    <span class="results-count">{{ results|length }} team(s) found</span>
                 </h2>
                 
                 {% if query %}
@@ -399,34 +399,32 @@
                 <table class="results-table">
                     <thead>
                         <tr>
-                            <th>Driver Name</th>
-                            <th>Age</th>
-                            <th>Team</th>
-                            <th>Pole Positions</th>
-                            <th>Race Wins</th>
-                            <th>Points</th>
-                            <th>World Titles</th>
-                            <th>Fastest Laps</th>
+                            <th>Team Name</th>
+                            <th>Year Founded</th>
+                            <th>Total Pole Positions</th>
+                            <th>Total Race Wins</th>
+                            <th>Total Constructor Titles</th>
+                            <th>Previous Season Position</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for driver in results %}
+                        {% for team in results %}
                         <tr>
-                            <td>{{ driver.name }}</td>
-                            <td>{{ driver.age }}</td>
-                            <td>{{ driver.team_name }}</td>
-                            <td>{{ driver.total_pole_positions }}</td>
-                            <td>{{ driver.total_race_wins }}</td>
-                            <td>{{ driver.total_points_scored }}</td>
-                            <td>{{ driver.total_world_titles }}</td>
-                            <td>{{ driver.total_fastest_laps }}</td>
+                            <td>
+                                <a href="/team/{{ team.id }}">{{ team.name }}</a>
+                            </td>
+                            <td>{{ team.year_founded }}</td>
+                            <td>{{ team.total_pole_positions }}</td>
+                            <td>{{ team.total_race_wins }}</td>
+                            <td>{{ team.total_constructor_titles }}</td>
+                            <td>{{ team.previous_season_position }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% else %}
                 <div class="no-results">
-                    <i class="fas fa-exclamation-circle"></i> No drivers match your query criteria
+                    <i class="fas fa-exclamation-circle"></i> No teams match your query criteria
                 </div>
                 {% endif %}
             </div>

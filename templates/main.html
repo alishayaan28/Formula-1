@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Assignment1-Formula 1</title>
+    <title>Assignment 1 Formula 1</title>
     <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
     <style>
         body {
@@ -285,6 +285,10 @@
             background: linear-gradient(90deg, #fbbc05, #ea4335);
         }
         
+        .action-card:nth-child(4):before {
+            background: linear-gradient(90deg, #34a853, #4285f4);
+        }
+        
         .action-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
@@ -302,6 +306,10 @@
         
         .action-card:nth-child(3) .action-icon {
             color: #fbbc05;
+        }
+        
+        .action-card:nth-child(4) .action-icon {
+            color: #34a853;
         }
         
         .action-title {
@@ -334,6 +342,11 @@
             box-shadow: 0 4px 10px rgba(251, 188, 5, 0.3);
         }
         
+        .action-card:nth-child(4) .action-button {
+            background-color: #34a853;
+            box-shadow: 0 4px 10px rgba(52, 168, 83, 0.3);
+        }
+        
         .action-button:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 15px rgba(66, 133, 244, 0.4);
@@ -345,6 +358,10 @@
         
         .action-card:nth-child(3) .action-button:hover {
             box-shadow: 0 6px 15px rgba(251, 188, 5, 0.4);
+        }
+        
+        .action-card:nth-child(4) .action-button:hover {
+            box-shadow: 0 6px 15px rgba(52, 168, 83, 0.4);
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -374,7 +391,10 @@
                 <i class="fas fa-users"></i> Team
             </a>
             <a href="/query-drivers" class="nav-link">
-                <i class="fas fa-search"></i> Query
+                <i class="fas fa-search"></i> Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i> Query Teams
             </a>
         </div>
         <button id="sign-out">
@@ -405,6 +425,14 @@
                 <i class="fas fa-search action-icon"></i>
                 <h3 class="action-title">Query Drivers</h3>
                 <a href="/query-drivers" class="action-button">
+                    <i class="fas fa-search"></i> Query
+                </a>
+            </div>
+            
+            <div class="action-card">
+                <i class="fas fa-search action-icon"></i>
+                <h3 class="action-title">Query Teams</h3>
+                <a href="/query-teams" class="action-button">
                     <i class="fas fa-search"></i> Query
                 </a>
             </div>

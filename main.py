@@ -498,3 +498,132 @@ async def process_query_drivers(
             'value': value
         }
     })
+
+# Function to query teams
+def query_teams(attribute: str, comparison: str, value: Any) -> list:
+    all_teams = get_all_teams()
+    results = []
+    
+    for team in all_teams:
+        if attribute in team:
+            if comparison == 'lt' and team[attribute] < value:
+                results.append(team)
+            elif comparison == 'gt' and team[attribute] > value:
+                results.append(team)
+            elif comparison == 'eq' and team[attribute] == value:
+                results.append(team)
+    
+    return results
+
+# Routes for querying teams
+@app.get("/query-teams", response_class=HTMLResponse)
+async def query_teams_form(request: Request):
+    # Retrieve the token from cookies
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+
+    # If we have an ID token, verify it against Firebase.
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    # Define available attributes for querying
+    attributes = [
+        {"value": "year_founded", "label": "Year Founded"},
+        {"value": "total_pole_positions", "label": "Total Pole Positions"},
+        {"value": "total_race_wins", "label": "Total Race Wins"},
+        {"value": "total_constructor_titles", "label": "Total Constructor Titles"},
+        {"value": "previous_season_position", "label": "Previous Season Position"}
+    ]
+    
+    comparisons = [
+        {"value": "lt", "label": "Less than"},
+        {"value": "eq", "label": "Equal to"},
+        {"value": "gt", "label": "Greater than"}
+    ]
+    
+    return templates.TemplateResponse('query_teams.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'attributes': attributes,
+        'comparisons': comparisons
+    })
+
+@app.post("/query-teams", response_class=HTMLResponse)
+async def process_query_teams(
+    request: Request,
+    attribute: str = Form(...),
+    comparison: str = Form(...),
+    value: str = Form(...)
+):
+    # Retrieve the token from cookies
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    results = []
+
+    # If we have an ID token, verify it against Firebase.
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    # Convert value to the correct type based on attribute
+    if attribute in ["year_founded", "total_pole_positions", "total_race_wins", 
+                     "total_constructor_titles", "previous_season_position"]:
+        query_value = int(value)
+    else:
+        query_value = value
+    
+    # Query teams without indexes
+    all_teams = []
+    for team in teams_ref.stream():
+        team_data = team.to_dict()
+        team_data["id"] = team.id
+        all_teams.append(team_data)
+    
+    # Apply filter based on comparison
+    for team in all_teams:
+        if attribute in team:
+            if comparison == "lt" and team[attribute] < query_value:
+                results.append(team)
+            elif comparison == "eq" and team[attribute] == query_value:
+                results.append(team)
+            elif comparison == "gt" and team[attribute] > query_value:
+                results.append(team)
+    
+    # Define available attributes for querying (for the form)
+    attributes = [
+        {"value": "year_founded", "label": "Year Founded"},
+        {"value": "total_pole_positions", "label": "Total Pole Positions"},
+        {"value": "total_race_wins", "label": "Total Race Wins"},
+        {"value": "total_constructor_titles", "label": "Total Constructor Titles"},
+        {"value": "previous_season_position", "label": "Previous Season Position"}
+    ]
+    
+    comparisons = [
+        {"value": "lt", "label": "Less than"},
+        {"value": "eq", "label": "Equal to"},
+        {"value": "gt", "label": "Greater than"}
+    ]
+    
+    return templates.TemplateResponse('query_teams.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'attributes': attributes,
+        'comparisons': comparisons,
+        'results': results,
+        'query': {
+            'attribute': attribute,
+            'comparison': comparison,
+            'value': value
+        }
+    })
