@@ -134,6 +134,22 @@ def query_drivers(attribute: str, comparison: str, value: Any) -> list:
     
     return results
 
+# Function to check if a team name already exists
+def team_name_exists(name: str) -> bool:
+    teams = get_all_teams()
+    for team in teams:
+        if team.get('name', '').lower() == name.lower():
+            return True
+    return False
+
+# Function to check if a driver name already exists
+def driver_name_exists(name: str) -> bool:
+    drivers = get_all_drivers()
+    for driver in drivers:
+        if driver.get('name', '').lower() == name.lower():
+            return True
+    return False
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     # Retrieve the token from cookies
@@ -219,6 +235,16 @@ async def create_driver(
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
             
+            # Check if driver name already exists
+            if driver_name_exists(name):
+                error_message = f"Driver '{name}' already exists. Please use a different name."
+                return templates.TemplateResponse('add_driver.html', {
+                    'request': request,
+                    'user_token': user_token,
+                    'error_message': error_message,
+                    'teams': get_all_teams()
+                })
+            
             # Create driver data dictionary
             driver_data = {
                 "name": name,
@@ -301,6 +327,15 @@ async def create_team(
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
             
+            # Check if team name already exists
+            if team_name_exists(name):
+                error_message = f"Team '{name}' already exists. Please use a different name."
+                return templates.TemplateResponse('add_team.html', {
+                    'request': request,
+                    'user_token': user_token,
+                    'error_message': error_message
+                })
+            
             # Create team data dictionary
             team_data = {
                 "name": name,
@@ -366,7 +401,7 @@ async def query_drivers_form(request: Request):
         {"value": "gt", "label": "Greater than"}
     ]
     
-    return templates.TemplateResponse('query_drivers.html', {
+    return templates.TemplateResponse('query.html', {
         'request': request,
         'user_token': user_token,
         'error_message': error_message,
@@ -450,7 +485,7 @@ async def process_query_drivers(
         {"value": "gt", "label": "Greater than"}
     ]
     
-    return templates.TemplateResponse('query_drivers.html', {
+    return templates.TemplateResponse('query.html', {
         'request': request,
         'user_token': user_token,
         'error_message': error_message,
