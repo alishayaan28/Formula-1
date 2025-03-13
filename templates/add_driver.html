@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Driver - Formula 1 Database</title>
+    <link type="text/css" href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet"/>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /*header*/
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #1a237e, #283593, #303f9f);
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #303f9f;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-email {
+            font-weight: 500;
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /*Navigation*/
+        .nav-links {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        #sign-out {
+            background-color: rgba(234, 67, 53, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        #sign-out:hover {
+            background-color: #ea4335;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .page-title {
+            color: #4285f4;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-row {
+            margin-bottom: 15px;
+        }
+        
+        .form-row label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-row input, .form-row select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-row input:focus, .form-row select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .submit-button {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .cancel-button {
+            background-color: #f1f1f1;
+            color: #333;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .submit-button:hover {
+            background-color: #3367d6;
+        }
+        
+        .cancel-button:hover {
+            background-color: #e2e2e2;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!--Header-->
+    <div class="header-bar" id="user-header">
+        <div class="user-section">
+            <div class="user-avatar">
+                {% if user_token.email %}
+                {{ user_token.email[0] | upper }}
+                {% else %}
+                U
+                {% endif %}
+            </div>
+            <p class="user-email" id="user-email-display">{{ user_token.email }}</p>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/add-driver" class="nav-link">
+                <i class="fas fa-user-plus"></i> Driver
+            </a>
+            <a href="/add-team" class="nav-link">
+                <i class="fas fa-users"></i> Team
+            </a>
+        </div>
+        <button id="sign-out">
+            <i class="fas fa-sign-out-alt"></i> Sign out
+        </button>
+    </div>
+    
+    <div class="content-area">
+        <div class="form-container">
+            <h2 class="page-title">Add New Driver</h2>
+            
+            {% if success_message %}
+            <div class="success-message">
+                {{ success_message }}
+            </div>
+            {% endif %}
+            
+            {% if error_message %}
+            <div class="error-message">
+                {{ error_message }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/add-driver">
+                <div class="form-row">
+                    <label for="name">Driver Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" min="16" max="60" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="total_pole_positions">Total Pole Positions</label>
+                    <input type="number" id="total_pole_positions" name="total_pole_positions" min="0" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="total_race_wins">Total Race Wins</label>
+                    <input type="number" id="total_race_wins" name="total_race_wins" min="0" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="total_points_scored">Total Points Scored</label>
+                    <input type="number" id="total_points_scored" name="total_points_scored" min="0" step="0.1" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="total_world_titles">Total World Titles</label>
+                    <input type="number" id="total_world_titles" name="total_world_titles" min="0" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="total_fastest_laps">Total Fastest Laps</label>
+                    <input type="number" id="total_fastest_laps" name="total_fastest_laps" min="0" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="team_id">Team</label>
+                    <select id="team_id" name="team_id" required>
+                        <option value="">-- Select Team --</option>
+                        {% for team in teams %}
+                        <option value="{{ team.id }}">{{ team.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="button-row">
+                    <button type="submit" class="submit-button">Add Driver</button>
+                    <a href="/" class="cancel-button">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sign out
+        document.getElementById("sign-out").addEventListener("click", function() {
+            if (typeof signOut === 'function') {
+                signOut();
+            }
+        });
+    </script>
+</body>
+</html>
