@@ -381,10 +381,6 @@ async def query_drivers_form(request: Request):
             print(str(err))
             error_message = str(err)
     
-    # If not logged in, redirect to home
-    if not user_token:
-        return RedirectResponse(url="/")
-    
 
     attributes = [
         {"value": "age", "label": "Age"},
@@ -464,10 +460,6 @@ async def process_query_drivers(
         except ValueError as err:
             print(str(err))
             error_message = str(err)
-    
-    # If not logged in, redirect to home
-    if not user_token:
-        return RedirectResponse(url="/")
     
     
     attributes = [

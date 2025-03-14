@@ -284,11 +284,24 @@
             align-items: center;
             color: #666;
         }
+        
+        .site-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .title-section {
+            display: flex;
+            align-items: center;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!--Header-->
+    {% if user_token %}
+    <!--logged in users-->
     <div class="header-bar" id="user-header">
         <div class="user-section">
             <div class="user-avatar">
@@ -321,6 +334,28 @@
             <i class="fas fa-sign-out-alt"></i> Sign out
         </button>
     </div>
+    {% else %}
+    <!--logged out users-->
+    <div class="header-bar">
+        <div class="title-section">
+            <h1 class="site-title">Formula 1 Database</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/query-drivers" class="nav-link">
+                <i class="fas fa-search"></i> Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i> Query Teams
+            </a>
+            <a href="/" class="nav-link">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+    {% endif %}
     
     <div class="content-area">
         <h1 class="page-title">Query Teams</h1>
@@ -433,12 +468,15 @@
     </div>
 
     <script>
-        // Sign out
-        document.getElementById("sign-out").addEventListener("click", function() {
-            if (typeof signOut === 'function') {
-                signOut();
-            }
-        });
+        //Sign Out 
+        var signOutButton = document.getElementById("sign-out");
+        if (signOutButton) {
+            signOutButton.addEventListener("click", function() {
+                if (typeof signOut === 'function') {
+                    signOut();
+                }
+            });
+        }
     </script>
 </body>
 </html>
