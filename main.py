@@ -108,7 +108,7 @@ def get_all_teams() -> list:
         teams.append(team_data)
     return teams
 
-# Function to get all drivers
+# Function to get all drivers.
 def get_all_drivers() -> list:
     drivers = []
     for driver in drivers_ref.stream():
@@ -117,7 +117,7 @@ def get_all_drivers() -> list:
         drivers.append(driver_data)
     return drivers
 
-# Function to query drivers
+# Function to query drivers.
 def query_drivers(attribute: str, comparison: str, value: Any) -> list:
     all_drivers = get_all_drivers()
     results = []
