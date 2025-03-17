@@ -296,6 +296,16 @@
             display: flex;
             align-items: center;
         }
+
+        .driver-link {
+            color: #4285f4;
+            text-decoration: none;
+            font-weight: 500;}
+            
+        .driver-link:hover {
+            text-decoration: underline;
+        }
+        
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -448,6 +458,10 @@
                     <tbody>
                         {% for driver in results %}
                         <tr>
+                            <td>
+                                <!--Hyperlink-->
+                                <a href="/driver/{{ driver.id }}" class="driver-link">{{ driver.name }}</a>
+                            </td>
                             <td>{{ driver.name }}</td>
                             <td>{{ driver.age }}</td>
                             <td>{{ driver.team_name }}</td>

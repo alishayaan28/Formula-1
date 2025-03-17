@@ -368,12 +368,10 @@ async def create_team(
 # Routes for querying drivers
 @app.get("/query-drivers", response_class=HTMLResponse)
 async def query_drivers_form(request: Request):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
@@ -412,55 +410,65 @@ async def process_query_drivers(
     comparison: str = Form(...),
     value: str = Form(...)
 ):
-    # Retrieve the token from cookies
-    id_token = request.cookies.get("token")
     error_message = None
     user_token = None
     results = []
 
-    # If we have an ID token, verify it against Firebase.
+    id_token = request.cookies.get("token")
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
-            
-            
-            if attribute in ["age", "total_pole_positions", "total_race_wins", "total_world_titles", "total_fastest_laps"]:
-                query_value = int(value)
-            elif attribute == "total_points_scored":
-                query_value = float(value)
-            else:
-                query_value = value
-            
-           
-            all_drivers = []
-            for driver in drivers_ref.stream():
-                driver_data = driver.to_dict()
-                driver_data["id"] = driver.id
-                all_drivers.append(driver_data)
-            
-            # Apply filter based on comparison
-            for driver in all_drivers:
-                if attribute in driver:
-                    if comparison == "lt" and driver[attribute] < query_value:
-                        results.append(driver)
-                    elif comparison == "eq" and driver[attribute] == query_value:
-                        results.append(driver)
-                    elif comparison == "gt" and driver[attribute] > query_value:
-                        results.append(driver)
-            
-            # Get team info for each driver in results
-            for driver in results:
-                if "team_id" in driver:
-                    team_doc = teams_ref.document(driver["team_id"]).get()
-                    if team_doc.exists:
-                        driver["team_name"] = team_doc.to_dict().get("name", "Unknown Team")
-                    else:
-                        driver["team_name"] = "Unknown Team"
-            
         except ValueError as err:
             print(str(err))
             error_message = str(err)
     
+    try:
+        query_value = value
+        if attribute in ["age", "total_pole_positions", "total_race_wins", "total_world_titles", "total_fastest_laps"]:
+            query_value = int(value)
+        elif attribute == "total_points_scored":
+            query_value = float(value)
+        
+        all_drivers = []
+        for driver in drivers_ref.stream():
+            driver_data = driver.to_dict()
+            driver_data["id"] = driver.id
+            all_drivers.append(driver_data)
+        
+        for driver in all_drivers:
+            if attribute in driver:
+                driver_value = driver[attribute]
+                if isinstance(driver_value, str) and attribute in ["age", "total_pole_positions", "total_race_wins", 
+                                                                  "total_world_titles", "total_fastest_laps"]:
+                    driver_value = int(driver_value)
+                elif isinstance(driver_value, str) and attribute == "total_points_scored":
+                    driver_value = float(driver_value)
+                
+                match_found = False
+                if comparison == "lt" and driver_value < query_value:
+                    match_found = True
+                elif comparison == "eq" and driver_value == query_value:
+                    match_found = True
+                elif comparison == "gt" and driver_value > query_value:
+                    match_found = True
+                
+                if match_found:
+                    if "team_id" in driver:
+                        team_doc = teams_ref.document(driver["team_id"]).get()
+                        if team_doc.exists:
+                            driver["team_name"] = team_doc.to_dict().get("name", "Unknown Team")
+                        else:
+                            driver["team_name"] = "Unknown Team"
+                    else:
+                        driver["team_name"] = "No Team"
+                    
+                    results.append(driver)
+        
+    except Exception as e:
+        error_message = f"Error processing query: {str(e)}"
+        print(f"ERROR: {error_message}")
+        import traceback
+        traceback.print_exc()
     
     attributes = [
         {"value": "age", "label": "Age"},
@@ -510,12 +518,10 @@ def query_teams(attribute: str, comparison: str, value: Any) -> list:
 # Routes for querying teams
 @app.get("/query-teams", response_class=HTMLResponse)
 async def query_teams_form(request: Request):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
@@ -523,7 +529,6 @@ async def query_teams_form(request: Request):
             print(str(err))
             error_message = str(err)
     
-    # Define available attributes for querying
     attributes = [
         {"value": "year_founded", "label": "Year Founded"},
         {"value": "total_pole_positions", "label": "Total Pole Positions"},
@@ -553,13 +558,11 @@ async def process_query_teams(
     comparison: str = Form(...),
     value: str = Form(...)
 ):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
     results = []
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
@@ -567,21 +570,18 @@ async def process_query_teams(
             print(str(err))
             error_message = str(err)
     
-    # Convert value to the correct type based on attribute
     if attribute in ["year_founded", "total_pole_positions", "total_race_wins", 
                      "total_constructor_titles", "previous_season_position"]:
         query_value = int(value)
     else:
         query_value = value
     
-    # Query teams without indexes
     all_teams = []
     for team in teams_ref.stream():
         team_data = team.to_dict()
         team_data["id"] = team.id
         all_teams.append(team_data)
     
-    # Apply filter based on comparison
     for team in all_teams:
         if attribute in team:
             if comparison == "lt" and team[attribute] < query_value:
@@ -591,7 +591,6 @@ async def process_query_teams(
             elif comparison == "gt" and team[attribute] > query_value:
                 results.append(team)
     
-    # Define available attributes for querying (for the form)
     attributes = [
         {"value": "year_founded", "label": "Year Founded"},
         {"value": "total_pole_positions", "label": "Total Pole Positions"},
@@ -618,4 +617,84 @@ async def process_query_teams(
             'comparison': comparison,
             'value': value
         }
+    })
+
+# Route for driver details
+@app.get("/driver/{driver_id}", response_class=HTMLResponse)
+async def driver_details(request: Request, driver_id: str):
+    error_message = None
+    user_token = None
+    driver = None
+    team = None
+
+    id_token = request.cookies.get("token")
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    try:
+        driver_doc = drivers_ref.document(driver_id).get()
+        if driver_doc.exists:
+            driver = driver_doc.to_dict()
+            driver['id'] = driver_id
+            
+            if 'team_id' in driver and driver['team_id']:
+                team_doc = teams_ref.document(driver['team_id']).get()
+                if team_doc.exists:
+                    team = team_doc.to_dict()
+                    team['id'] = driver['team_id']
+        else:
+            error_message = "Driver not found"
+    except Exception as e:
+        error_message = f"Error retrieving driver details: {str(e)}"
+    
+    return templates.TemplateResponse('driver_details.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'driver': driver,
+        'team': team
+    })
+
+# Route for team details
+@app.get("/team/{team_id}", response_class=HTMLResponse)
+async def team_details(request: Request, team_id: str):
+    error_message = None
+    user_token = None
+    team = None
+    drivers = []
+
+    id_token = request.cookies.get("token")
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    try:
+        team_doc = teams_ref.document(team_id).get()
+        if team_doc.exists:
+            team = team_doc.to_dict()
+            team['id'] = team_id
+            
+            drivers_query = drivers_ref.where('team_id', '==', team_id).stream()
+            for driver_doc in drivers_query:
+                driver_data = driver_doc.to_dict()
+                driver_data['id'] = driver_doc.id
+                drivers.append(driver_data)
+        else:
+            error_message = "Team not found"
+    except Exception as e:
+        error_message = f"Error retrieving team details: {str(e)}"
+    
+    return templates.TemplateResponse('team_details.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'team': team,
+        'drivers': drivers
     })
