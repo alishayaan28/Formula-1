@@ -783,3 +783,101 @@ async def update_driver(
         'driver': driver,
         'teams': teams
     })
+
+# Routes for editing teams
+@app.get("/edit-team/{team_id}", response_class=HTMLResponse)
+async def edit_team_page(request: Request, team_id: str):
+
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    team = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    if not user_token:
+        return RedirectResponse(url="/")
+    
+    try:
+        team_doc = teams_ref.document(team_id).get()
+        if team_doc.exists:
+            team = team_doc.to_dict()
+            team['id'] = team_id
+        else:
+            error_message = "Team not found"
+    except Exception as e:
+        error_message = f"Error retrieving team details: {str(e)}"
+    
+    return templates.TemplateResponse('edit_team.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'team': team
+    })
+
+@app.post("/edit-team/{team_id}", response_class=HTMLResponse)
+async def update_team(
+    request: Request,
+    team_id: str,
+    name: str = Form(...),
+    year_founded: int = Form(...),
+    total_pole_positions: int = Form(...),
+    total_race_wins: int = Form(...),
+    total_constructor_titles: int = Form(...),
+    previous_season_position: int = Form(...)
+):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    success_message = None
+    team = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    if not user_token:
+        return RedirectResponse(url="/")
+    
+    try:
+        team_doc = teams_ref.document(team_id).get()
+        if not team_doc.exists:
+            error_message = "Team not found"
+        else:
+            team = team_doc.to_dict()
+            team['id'] = team_id
+            
+            if name != team.get('name', '') and team_name_exists(name):
+                error_message = f"Team '{name}' already exists. Please use a different name."
+            else:
+                updated_team_data = {
+                    "name": name,
+                    "year_founded": year_founded,
+                    "total_pole_positions": total_pole_positions,
+                    "total_race_wins": total_race_wins,
+                    "total_constructor_titles": total_constructor_titles,
+                    "previous_season_position": previous_season_position
+                }
+                
+                teams_ref.document(team_id).update(updated_team_data)
+                success_message = f"Team {name} updated successfully!"
+                
+                team.update(updated_team_data)
+    except Exception as e:
+        error_message = f"Error updating team: {str(e)}"
+    
+    return templates.TemplateResponse('edit_team.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'success_message': success_message,
+        'team': team
+    })
