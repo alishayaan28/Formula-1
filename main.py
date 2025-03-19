@@ -157,18 +157,16 @@ async def root(request: Request):
     error_message = "No error here"
     user_token = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
-            error_message = None  # No error if verification succeeds
+            error_message = None 
         except ValueError as err:
-            # Log the error message to the console for debugging
+           
             print(str(err))
-            user_token = None  # Ensure user_token is always defined
-            error_message = str(err)  # Store the error message
+            user_token = None 
+            error_message = str(err) 
 
-    # Always return a response, even if there's no token
     return templates.TemplateResponse('main.html', {
         'request': request,
         'user_token': user_token,
@@ -185,12 +183,10 @@ async def logout():
 # Routes for adding drivers
 @app.get("/add-driver", response_class=HTMLResponse)
 async def add_driver_page(request: Request):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
@@ -198,11 +194,9 @@ async def add_driver_page(request: Request):
             print(str(err))
             error_message = str(err)
     
-    # If not logged in, redirect to home
     if not user_token:
         return RedirectResponse(url="/")
     
-    # Get all teams for dropdown selection
     teams = get_all_teams()
     
     return templates.TemplateResponse('add_driver.html', {
@@ -224,18 +218,15 @@ async def create_driver(
     total_fastest_laps: int = Form(...),
     team_id: str = Form(...)
 ):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
     success_message = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
             
-            # Check if driver name already exists
             if driver_name_exists(name):
                 error_message = f"Driver '{name}' already exists. Please use a different name."
                 return templates.TemplateResponse('add_driver.html', {
@@ -245,7 +236,6 @@ async def create_driver(
                     'teams': get_all_teams()
                 })
             
-            # Create driver data dictionary
             driver_data = {
                 "name": name,
                 "age": age,
@@ -257,7 +247,6 @@ async def create_driver(
                 "team_id": team_id
             }
             
-            # Add driver to Firestore
             add_driver(driver_data)
             success_message = f"Driver {name} added successfully!"
             
@@ -265,11 +254,9 @@ async def create_driver(
             print(str(err))
             error_message = str(err)
     
-    # If not logged in, redirect to home
     if not user_token:
         return RedirectResponse(url="/")
     
-    # Get all teams for dropdown selection
     teams = get_all_teams()
     
     return templates.TemplateResponse('add_driver.html', {
@@ -283,12 +270,10 @@ async def create_driver(
 # Routes for adding teams
 @app.get("/add-team", response_class=HTMLResponse)
 async def add_team_page(request: Request):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
@@ -296,7 +281,6 @@ async def add_team_page(request: Request):
             print(str(err))
             error_message = str(err)
     
-    # If not logged in, redirect to home
     if not user_token:
         return RedirectResponse(url="/")
     
@@ -316,18 +300,15 @@ async def create_team(
     total_constructor_titles: int = Form(...),
     previous_season_position: int = Form(...)
 ):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = None
     user_token = None
     success_message = None
 
-    # If we have an ID token, verify it against Firebase.
     if id_token:
         try:
             user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
             
-            # Check if team name already exists
             if team_name_exists(name):
                 error_message = f"Team '{name}' already exists. Please use a different name."
                 return templates.TemplateResponse('add_team.html', {
@@ -336,7 +317,6 @@ async def create_team(
                     'error_message': error_message
                 })
             
-            # Create team data dictionary
             team_data = {
                 "name": name,
                 "year_founded": year_founded,
@@ -346,7 +326,6 @@ async def create_team(
                 "previous_season_position": previous_season_position
             }
             
-            # Add team to Firestore
             add_team(team_data)
             success_message = f"Team {name} added successfully!"
             
@@ -354,7 +333,6 @@ async def create_team(
             print(str(err))
             error_message = str(err)
     
-    # If not logged in, redirect to home
     if not user_token:
         return RedirectResponse(url="/")
     
@@ -697,4 +675,111 @@ async def team_details(request: Request, team_id: str):
         'error_message': error_message,
         'team': team,
         'drivers': drivers
+    })
+
+# Routes for editing drivers
+@app.get("/edit-driver/{driver_id}", response_class=HTMLResponse)
+async def edit_driver_page(request: Request, driver_id: str):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    driver = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    if not user_token:
+        return RedirectResponse(url="/")
+    
+    try:
+        driver_doc = drivers_ref.document(driver_id).get()
+        if driver_doc.exists:
+            driver = driver_doc.to_dict()
+            driver['id'] = driver_id
+        else:
+            error_message = "Driver not found"
+    except Exception as e:
+        error_message = f"Error retrieving driver details: {str(e)}"
+    
+    teams = get_all_teams()
+    
+    return templates.TemplateResponse('edit_driver.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'driver': driver,
+        'teams': teams
+    })
+
+@app.post("/edit-driver/{driver_id}", response_class=HTMLResponse)
+async def update_driver(
+    request: Request,
+    driver_id: str,
+    name: str = Form(...),
+    age: int = Form(...),
+    total_pole_positions: int = Form(...),
+    total_race_wins: int = Form(...),
+    total_points_scored: float = Form(...),
+    total_world_titles: int = Form(...),
+    total_fastest_laps: int = Form(...),
+    team_id: str = Form(...)
+):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    success_message = None
+    driver = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    if not user_token:
+        return RedirectResponse(url="/")
+    
+    try:
+        driver_doc = drivers_ref.document(driver_id).get()
+        if not driver_doc.exists:
+            error_message = "Driver not found"
+        else:
+            driver = driver_doc.to_dict()
+            driver['id'] = driver_id
+            
+            if name != driver.get('name', '') and driver_name_exists(name):
+                error_message = f"Driver '{name}' already exists. Please use a different name."
+            else:
+                updated_driver_data = {
+                    "name": name,
+                    "age": age,
+                    "total_pole_positions": total_pole_positions,
+                    "total_race_wins": total_race_wins,
+                    "total_points_scored": total_points_scored,
+                    "total_world_titles": total_world_titles,
+                    "total_fastest_laps": total_fastest_laps,
+                    "team_id": team_id
+                }
+                
+                drivers_ref.document(driver_id).update(updated_driver_data)
+                success_message = f"Driver {name} updated successfully!"
+                
+                driver.update(updated_driver_data)
+    except Exception as e:
+        error_message = f"Error updating driver: {str(e)}"
+    
+    teams = get_all_teams()
+    
+    return templates.TemplateResponse('edit_driver.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'success_message': success_message,
+        'driver': driver,
+        'teams': teams
     })

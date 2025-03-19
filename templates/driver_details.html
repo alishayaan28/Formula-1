@@ -223,6 +223,26 @@
             display: flex;
             align-items: center;
         }
+
+        .action-buttons {
+            margin-top: 10px;
+        }
+        
+        .edit-button {
+            display: inline-block;
+            background-color: #4285f4;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .edit-button:hover {
+            background-color: #3367d6;
+        }
+    
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -297,6 +317,13 @@
         <div class="detail-card">
             <div class="detail-header">
                 <h1 class="detail-title">{{ driver.name }}</h1>
+        {% if user_token %}
+        <div class="action-buttons">
+            <a href="/edit-driver/{{ driver.id }}" class="edit-button">
+                <i class="fas fa-edit"></i> Edit Driver
+            </a>
+        </div>
+        {% endif %}
             </div>
             
             <div class="detail-content">
