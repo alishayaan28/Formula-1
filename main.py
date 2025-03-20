@@ -942,3 +942,90 @@ async def delete_team(request: Request, team_id: str):
     except Exception as e:
         print(f"Error deleting team: {str(e)}")
         return RedirectResponse(url="/query-teams?error=delete_failed")
+    
+
+    # Routes for comparing drivers
+@app.get("/compare-drivers", response_class=HTMLResponse)
+async def compare_drivers_form(request: Request):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    all_drivers = get_all_drivers()
+    
+    return templates.TemplateResponse('compare_drivers.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'drivers': all_drivers
+    })
+
+@app.post("/compare-drivers", response_class=HTMLResponse)
+async def process_driver_comparison(
+    request: Request,
+    driver1_id: str = Form(...),
+    driver2_id: str = Form(...)
+):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    driver1 = None
+    driver2 = None
+    team1 = None
+    team2 = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    try:
+        driver1_doc = drivers_ref.document(driver1_id).get()
+        if driver1_doc.exists:
+            driver1 = driver1_doc.to_dict()
+            driver1['id'] = driver1_id
+            
+            if 'team_id' in driver1 and driver1['team_id']:
+                team1_doc = teams_ref.document(driver1['team_id']).get()
+                if team1_doc.exists:
+                    team1 = team1_doc.to_dict()
+                    team1['id'] = driver1['team_id']
+        
+        driver2_doc = drivers_ref.document(driver2_id).get()
+        if driver2_doc.exists:
+            driver2 = driver2_doc.to_dict()
+            driver2['id'] = driver2_id
+            
+            if 'team_id' in driver2 and driver2['team_id']:
+                team2_doc = teams_ref.document(driver2['team_id']).get()
+                if team2_doc.exists:
+                    team2 = team2_doc.to_dict()
+                    team2['id'] = driver2['team_id']
+        
+        if not driver1 or not driver2:
+            error_message = "One or both drivers not found"
+            
+    except Exception as e:
+        error_message = f"Error retrieving driver details: {str(e)}"
+    
+    all_drivers = get_all_drivers()
+    
+    return templates.TemplateResponse('comparison_results.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'driver1': driver1,
+        'driver2': driver2,
+        'team1': team1,
+        'team2': team2,
+        'drivers': all_drivers
+    })

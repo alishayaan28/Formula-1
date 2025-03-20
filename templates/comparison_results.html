@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Comparison</title>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /*Header*/
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #1a237e, #283593, #303f9f);
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #303f9f;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-email {
+            font-weight: 500;
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /*Navigation*/
+        .nav-links {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        #sign-out {
+            background-color: rgba(234, 67, 53, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        #sign-out:hover {
+            background-color: #ea4335;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .comparison-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .page-title {
+            color: #4285f4;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .site-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .title-section {
+            display: flex;
+            align-items: center;
+        }
+        
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        
+        .driver-header {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .driver-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .driver-team {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .vs-column {
+            width: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .vs-text {
+            font-weight: 600;
+            color: #666;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table tr {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comparison-table tr:last-child {
+            border-bottom: none;
+        }
+        
+        .comparison-table td {
+            padding: 15px 10px;
+            text-align: center;
+        }
+        
+        .comparison-table td.stat-name {
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .higher {
+            color: #34a853;
+            position: relative;
+        }
+        
+        .higher:after {
+            content: '▲';
+            font-size: 12px;
+            position: absolute;
+            top: 0;
+            margin-left: 5px;
+        }
+        
+        .lower {
+            color: #ea4335;
+            position: relative;
+        }
+        
+        .lower:after {
+            content: '▼';
+            font-size: 12px;
+            position: absolute;
+            top: 0;
+            margin-left: 5px;
+        }
+        
+        .equal {
+            color: #4285f4;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4285f4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .compare-again {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .compare-button {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .compare-button:hover {
+            background-color: #3367d6;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% if user_token %}
+    <div class="header-bar" id="user-header">
+        <div class="user-section">
+            <div class="user-avatar">
+                {% if user_token.email %}
+                {{ user_token.email[0] | upper }}
+                {% else %}
+                U
+                {% endif %}
+            </div>
+            <p class="user-email" id="user-email-display">{{ user_token.email }}</p>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/add-driver" class="nav-link">
+                <i class="fas fa-user-plus"></i> Driver
+            </a>
+            <a href="/add-team" class="nav-link">
+                <i class="fas fa-users"></i> Team
+            </a>
+            <a href="/query-drivers" class="nav-link">
+                <i class="fas fa-search"></i> Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i> Query Teams
+            </a>
+            <a href="/compare-drivers" class="nav-link">
+                <i class="fas fa-balance-scale"></i> Compare
+            </a>
+        </div>
+        <button id="sign-out">
+            <i class="fas fa-sign-out-alt"></i> Sign out
+        </button>
+    </div>
+    {% else %}
+    <div class="header-bar">
+        <div class="title-section">
+            <h1 class="site-title">Formula 1 Database</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/query-drivers" class="nav-link">
+                <i class="fas fa-search"></i> Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i> Query Teams
+            </a>
+            <a href="/compare-drivers" class="nav-link">
+                <i class="fas fa-balance-scale"></i> Compare
+            </a>
+            <a href="/" class="nav-link">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="content-area">
+        <a href="/compare-drivers" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Driver Selection
+        </a>
+        
+        {% if error_message %}
+        <div class="error-message">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        
+        {% if driver1 and driver2 %}
+        <div class="comparison-container">
+            <h2 class="page-title">Driver Comparison</h2>
+            
+            <div class="comparison-header">
+                <div class="driver-header">
+                    <div class="driver-name">
+                        <a href="/driver/{{ driver1.id }}">{{ driver1.name }}</a>
+                    </div>
+                    <div class="driver-team">
+                        {% if team1 %}
+                        <a href="/team/{{ team1.id }}">{{ team1.name }}</a>
+                        {% else %}
+                        No Team
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="vs-column">
+                    <div class="vs-text">VS</div>
+                </div>
+                
+                <div class="driver-header">
+                    <div class="driver-name">
+                        <a href="/driver/{{ driver2.id }}">{{ driver2.name }}</a>
+                    </div>
+                    <div class="driver-team">
+                        {% if team2 %}
+                        <a href="/team/{{ team2.id }}">{{ team2.name }}</a>
+                        {% else %}
+                        No Team
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <table class="comparison-table">
+                <tr>
+                    <td class="stat-value {% if driver1.age > driver2.age %}higher{% elif driver1.age < driver2.age %}lower{% else %}equal{% endif %}">
+                        {{ driver1.age }}
+                    </td>
+                    <td class="stat-name">Age</td>
+                    <td class="stat-value {% if driver2.age > driver1.age %}higher{% elif driver2.age < driver1.age %}lower{% else %}equal{% endif %}">
+                        {{ driver2.age }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-value {% if driver1.total_pole_positions > driver2.total_pole_positions %}higher{% elif driver1.total_pole_positions < driver2.total_pole_positions %}lower{% else %}equal{% endif %}">
+                        {{ driver1.total_pole_positions }}
+                    </td>
+                    <td class="stat-name">Pole Positions</td>
+                    <td class="stat-value {% if driver2.total_pole_positions > driver1.total_pole_positions %}higher{% elif driver2.total_pole_positions < driver1.total_pole_positions %}lower{% else %}equal{% endif %}">
+                        {{ driver2.total_pole_positions }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-value {% if driver1.total_race_wins > driver2.total_race_wins %}higher{% elif driver1.total_race_wins < driver2.total_race_wins %}lower{% else %}equal{% endif %}">
+                        {{ driver1.total_race_wins }}
+                    </td>
+                    <td class="stat-name">Race Wins</td>
+                    <td class="stat-value {% if driver2.total_race_wins > driver1.total_race_wins %}higher{% elif driver2.total_race_wins < driver1.total_race_wins %}lower{% else %}equal{% endif %}">
+                        {{ driver2.total_race_wins }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-value {% if driver1.total_points_scored > driver2.total_points_scored %}higher{% elif driver1.total_points_scored < driver2.total_points_scored %}lower{% else %}equal{% endif %}">
+                        {{ driver1.total_points_scored }}
+                    </td>
+                    <td class="stat-name">Points Scored</td>
+                    <td class="stat-value {% if driver2.total_points_scored > driver1.total_points_scored %}higher{% elif driver2.total_points_scored < driver1.total_points_scored %}lower{% else %}equal{% endif %}">
+                        {{ driver2.total_points_scored }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-value {% if driver1.total_world_titles > driver2.total_world_titles %}higher{% elif driver1.total_world_titles < driver2.total_world_titles %}lower{% else %}equal{% endif %}">
+                        {{ driver1.total_world_titles }}
+                    </td>
+                    <td class="stat-name">World Titles</td>
+                    <td class="stat-value {% if driver2.total_world_titles > driver1.total_world_titles %}higher{% elif driver2.total_world_titles < driver1.total_world_titles %}lower{% else %}equal{% endif %}">
+                        {{ driver2.total_world_titles }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="stat-value {% if driver1.total_fastest_laps > driver2.total_fastest_laps %}higher{% elif driver1.total_fastest_laps < driver2.total_fastest_laps %}lower{% else %}equal{% endif %}">
+                        {{ driver1.total_fastest_laps }}
+                    </td>
+                    <td class="stat-name">Fastest Laps</td>
+                    <td class="stat-value {% if driver2.total_fastest_laps > driver1.total_fastest_laps %}higher{% elif driver2.total_fastest_laps < driver1.total_fastest_laps %}lower{% else %}equal{% endif %}">
+                        {{ driver2.total_fastest_laps }}
+                    </td>
+                </tr>
+            </table>
+            
+            <div class="compare-again">
+                <a href="/compare-drivers" class="compare-button">
+                    <i class="fas fa-sync-alt"></i> Compare Different Drivers
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Sign out
+        var signOutButton = document.getElementById("sign-out");
+        if (signOutButton) {
+            signOutButton.addEventListener("click", function() {
+                if (typeof signOut === 'function') {
+                    signOut();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

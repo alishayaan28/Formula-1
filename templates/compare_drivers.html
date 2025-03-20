@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compare Drivers</title>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /*Header*/
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #1a237e, #283593, #303f9f);
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #303f9f;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-email {
+            font-weight: 500;
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /*Navigation*/
+        .nav-links {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        #sign-out {
+            background-color: rgba(234, 67, 53, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        #sign-out:hover {
+            background-color: #ea4335;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .page-title {
+            color: #4285f4;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-row {
+            margin-bottom: 15px;
+        }
+        
+        .form-row label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-row select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-row select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .submit-button {
+            background-color: #4285f4;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .submit-button:hover {
+            background-color: #3367d6;
+        }
+        
+        .site-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .title-section {
+            display: flex;
+            align-items: center;
+        }
+        
+        .vs-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .vs-separator:before, .vs-separator:after {
+            content: '';
+            height: 1px;
+            background-color: #ddd;
+            flex: 1;
+        }
+        
+        .vs-text {
+            margin: 0 15px;
+            font-weight: 600;
+            color: #666;
+            background: white;
+            padding: 0 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% if user_token %}
+    <div class="header-bar" id="user-header">
+        <div class="user-section">
+            <div class="user-avatar">
+                {% if user_token.email %}
+                {{ user_token.email[0] | upper }}
+                {% else %}
+                U
+                {% endif %}
+            </div>
+            <p class="user-email" id="user-email-display">{{ user_token.email }}</p>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/add-driver" class="nav-link">
+                <i class="fas fa-user-plus"></i> Driver
+            </a>
+            <a href="/add-team" class="nav-link">
+                <i class="fas fa-users"></i> Team
+            </a>
+            <a href="/query-drivers" class="nav-link">
+                <i class="fas fa-search"></i> Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i> Query Teams
+            </a>
+            <a href="/compare-drivers" class="nav-link">
+                <i class="fas fa-balance-scale"></i> Compare
+            </a>
+        </div>
+        <button id="sign-out">
+            <i class="fas fa-sign-out-alt"></i> Sign out
+        </button>
+    </div>
+    {% else %}
+    <div class="header-bar">
+        <div class="title-section">
+            <h1 class="site-title">Formula 1 Database</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="/query-drivers" class="nav-link">
+                <i class="fas fa-search"></i> Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i> Query Teams
+            </a>
+            <a href="/compare-drivers" class="nav-link">
+                <i class="fas fa-balance-scale"></i> Compare
+            </a>
+            <a href="/" class="nav-link">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="content-area">
+        <div class="form-container">
+            <h2 class="page-title">Compare Drivers</h2>
+            
+            {% if error_message %}
+            <div class="error-message">
+                {{ error_message }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/compare-drivers">
+                <div class="form-row">
+                    <label for="driver1_id">First Driver</label>
+                    <select id="driver1_id" name="driver1_id" required>
+                        <option value="">-- Select First Driver --</option>
+                        {% for driver in drivers %}
+                        <option value="{{ driver.id }}">{{ driver.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="vs-separator">
+                    <span class="vs-text">VS</span>
+                </div>
+                
+                <div class="form-row">
+                    <label for="driver2_id">Second Driver</label>
+                    <select id="driver2_id" name="driver2_id" required>
+                        <option value="">-- Select Second Driver --</option>
+                        {% for driver in drivers %}
+                        <option value="{{ driver.id }}">{{ driver.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-button">Compare</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sign out
+        var signOutButton = document.getElementById("sign-out");
+        if (signOutButton) {
+            signOutButton.addEventListener("click", function() {
+                if (typeof signOut === 'function') {
+                    signOut();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
