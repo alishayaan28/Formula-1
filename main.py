@@ -881,3 +881,64 @@ async def update_team(
         'success_message': success_message,
         'team': team
     })
+
+
+# Routes for deleting drivers
+@app.get("/delete-driver/{driver_id}", response_class=HTMLResponse)
+async def delete_driver(request: Request, driver_id: str):
+    id_token = request.cookies.get("token")
+    user_token = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            return RedirectResponse(url="/")
+    
+    if not user_token:
+        return RedirectResponse(url="/")
+    
+    try:
+        driver_doc = drivers_ref.document(driver_id).get()
+        if driver_doc.exists:
+            drivers_ref.document(driver_id).delete()
+            return RedirectResponse(url="/query-drivers?deleted=true")
+        else:
+            return RedirectResponse(url="/query-drivers?error=not_found")
+    except Exception as e:
+        print(f"Error deleting driver: {str(e)}")
+        return RedirectResponse(url="/query-drivers?error=delete_failed")
+
+@app.get("/delete-team/{team_id}", response_class=HTMLResponse)
+async def delete_team(request: Request, team_id: str):
+    id_token = request.cookies.get("token")
+    user_token = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            return RedirectResponse(url="/")
+    
+    if not user_token:
+        return RedirectResponse(url="/")
+    
+    try:
+        team_doc = teams_ref.document(team_id).get()
+        if team_doc.exists:
+            drivers_query = drivers_ref.where('team_id', '==', team_id).stream()
+            
+            for driver_doc in drivers_query:
+                driver_ref = drivers_ref.document(driver_doc.id)
+                driver_ref.update({'team_id': ''})
+            
+            teams_ref.document(team_id).delete()
+            
+            return RedirectResponse(url="/query-teams?deleted=true")
+        else:
+            return RedirectResponse(url="/query-teams?error=not_found")
+    except Exception as e:
+        print(f"Error deleting team: {str(e)}")
+        return RedirectResponse(url="/query-teams?error=delete_failed")

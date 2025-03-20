@@ -306,7 +306,23 @@
         
         .team-link:hover {
              text-decoration: underline;
-            }
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -370,6 +386,24 @@
     
     <div class="content-area">
         <h1 class="page-title">Query Teams</h1>
+        
+        {% if request.query_params.get('deleted') == 'true' %}
+        <div class="success-message">
+            Team was successfully deleted.
+        </div>
+        {% endif %}
+
+        {% if request.query_params.get('error') == 'not_found' %}
+        <div class="error-message">
+            Team not found.
+        </div>
+        {% endif %}
+
+        {% if request.query_params.get('error') == 'delete_failed' %}
+        <div class="error-message">
+            Failed to delete team. Please try again.
+        </div>
+        {% endif %}
         
         <div class="query-container">
             <div class="query-form">

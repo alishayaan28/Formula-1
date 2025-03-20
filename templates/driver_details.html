@@ -242,6 +242,23 @@
         .edit-button:hover {
             background-color: #3367d6;
         }
+        
+        .delete-button {
+             display: inline-block;
+             background-color: #ea4335;
+             color: white;
+             padding: 8px 15px;
+             border-radius: 4px;
+             border: none;
+             text-decoration: none;
+             font-weight: 500;
+             font-size: 14px;
+             cursor: pointer;
+             margin-left: 10px;
+        }
+        .delete-button:hover {
+                background-color: #d73125;
+        }
     
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -322,6 +339,9 @@
             <a href="/edit-driver/{{ driver.id }}" class="edit-button">
                 <i class="fas fa-edit"></i> Edit Driver
             </a>
+            <button onclick="confirmDelete('/delete-driver/{{ driver.id }}')" class="delete-button">
+                <i class="fas fa-trash"></i> Delete Driver
+            </button>
         </div>
         {% endif %}
             </div>
@@ -389,7 +409,13 @@
     </div>
 
     <script>
-        // Sign Out
+        function confirmDelete(deleteUrl) {
+            if (confirm("Are you sure you want to delete? This action cannot be undone.")) {
+                window.location.href = deleteUrl;
+            }
+        }
+        
+        // Sign out
         var signOutButton = document.getElementById("sign-out");
         if (signOutButton) {
             signOutButton.addEventListener("click", function() {
