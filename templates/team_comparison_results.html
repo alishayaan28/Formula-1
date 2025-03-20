@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Driver Comparison</title>
+    <title>Team Comparison</title>
     <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
     <style>
         body {
@@ -61,7 +61,8 @@
         /*Navigation*/
         .nav-links {
             display: flex;
-            gap: 5px;
+            gap: 8px;
+            align-items: center;
         }
         
         .nav-link {
@@ -69,9 +70,21 @@
             text-decoration: none;
             font-weight: 500;
             background-color: rgba(255, 255, 255, 0.1);
-            padding: 8px 15px;
+            padding: 8px 10px;
             border-radius: 5px;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100px;
+            height: 50px;
+            justify-content: center;
+        }
+        
+        .nav-link i {
+            font-size: 16px;
+            margin-bottom: 4px;
         }
         
         .nav-link:hover {
@@ -89,6 +102,9 @@
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         #sign-out:hover {
@@ -147,20 +163,15 @@
             margin-bottom: 30px;
         }
         
-        .driver-header {
+        .team-header {
             text-align: center;
             flex: 1;
         }
         
-        .driver-name {
+        .team-name {
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 5px;
-        }
-        
-        .driver-team {
-            font-size: 16px;
-            color: #666;
         }
         
         .vs-column {
@@ -214,34 +225,8 @@
             font-weight: 600;
         }
         
-        .higher {
+        .better {
             color: #34a853;
-            position: relative;
-        }
-        
-        .higher:after {
-            content: '▲';
-            font-size: 12px;
-            position: absolute;
-            top: 0;
-            margin-left: 5px;
-        }
-        
-        .lower {
-            color: #ea4335;
-            position: relative;
-        }
-        
-        .lower:after {
-            content: '▼';
-            font-size: 12px;
-            position: absolute;
-            top: 0;
-            margin-left: 5px;
-        }
-        
-        .equal {
-            color: #4285f4;
         }
         
         .back-link {
@@ -277,9 +262,43 @@
         .compare-button:hover {
             background-color: #3367d6;
         }
-        .better {
-             color: #34a853;
-            }
+        
+        .drivers-section {
+            margin-top: 30px;
+        }
+        
+        .section-title {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .driver-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .driver-item {
+            padding: 8px 0;
+        }
+        
+        .driver-link {
+            color: #4285f4;
+            text-decoration: none;
+        }
+        
+        .driver-link:hover {
+            text-decoration: underline;
+        }
+        
+        .no-drivers {
+            color: #666;
+            font-style: italic;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -298,22 +317,32 @@
         </div>
         <div class="nav-links">
             <a href="/" class="nav-link">
-                <i class="fas fa-home"></i> Home
+                <i class="fas fa-home"></i>
+                Home
             </a>
             <a href="/add-driver" class="nav-link">
-                <i class="fas fa-user-plus"></i> Driver
+                <i class="fas fa-user-plus"></i>
+                Driver
             </a>
             <a href="/add-team" class="nav-link">
-                <i class="fas fa-users"></i> Team
+                <i class="fas fa-users"></i>
+                Team
             </a>
             <a href="/query-drivers" class="nav-link">
-                <i class="fas fa-search"></i> Query Drivers
+                <i class="fas fa-search"></i>
+                Query Drivers
             </a>
             <a href="/query-teams" class="nav-link">
-                <i class="fas fa-search"></i> Query Teams
+                <i class="fas fa-search"></i>
+                Query Teams
             </a>
             <a href="/compare-drivers" class="nav-link">
-                <i class="fas fa-balance-scale"></i> Compare
+                <i class="fas fa-balance-scale"></i>
+                Compare Drivers
+            </a>
+            <a href="/compare-teams" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                Compare Teams
             </a>
         </div>
         <button id="sign-out">
@@ -327,27 +356,36 @@
         </div>
         <div class="nav-links">
             <a href="/" class="nav-link">
-                <i class="fas fa-home"></i> Home
+                <i class="fas fa-home"></i>
+                Home
             </a>
             <a href="/query-drivers" class="nav-link">
-                <i class="fas fa-search"></i> Query Drivers
+                <i class="fas fa-search"></i>
+                Query Drivers
             </a>
             <a href="/query-teams" class="nav-link">
-                <i class="fas fa-search"></i> Query Teams
+                <i class="fas fa-search"></i>
+                Query Teams
             </a>
             <a href="/compare-drivers" class="nav-link">
-                <i class="fas fa-balance-scale"></i> Compare
+                <i class="fas fa-balance-scale"></i>
+                Compare Drivers
+            </a>
+            <a href="/compare-teams" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                Compare Teams
             </a>
             <a href="/" class="nav-link">
-                <i class="fas fa-sign-in-alt"></i> Login
+                <i class="fas fa-sign-in-alt"></i>
+                Login
             </a>
         </div>
     </div>
     {% endif %}
     
     <div class="content-area">
-        <a href="/compare-drivers" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to Driver Selection
+        <a href="/compare-teams" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Team Selection
         </a>
         
         {% if error_message %}
@@ -356,21 +394,14 @@
         </div>
         {% endif %}
         
-        {% if driver1 and driver2 %}
+        {% if team1 and team2 %}
         <div class="comparison-container">
-            <h2 class="page-title">Driver Comparison</h2>
+            <h2 class="page-title">Team Comparison</h2>
             
             <div class="comparison-header">
-                <div class="driver-header">
-                    <div class="driver-name">
-                        <a href="/driver/{{ driver1.id }}">{{ driver1.name }}</a>
-                    </div>
-                    <div class="driver-team">
-                        {% if team1 %}
+                <div class="team-header">
+                    <div class="team-name">
                         <a href="/team/{{ team1.id }}">{{ team1.name }}</a>
-                        {% else %}
-                        No Team
-                        {% endif %}
                     </div>
                 </div>
                 
@@ -378,80 +409,100 @@
                     <div class="vs-text">VS</div>
                 </div>
                 
-                <div class="driver-header">
-                    <div class="driver-name">
-                        <a href="/driver/{{ driver2.id }}">{{ driver2.name }}</a>
-                    </div>
-                    <div class="driver-team">
-                        {% if team2 %}
+                <div class="team-header">
+                    <div class="team-name">
                         <a href="/team/{{ team2.id }}">{{ team2.name }}</a>
-                        {% else %}
-                        No Team
-                        {% endif %}
                     </div>
                 </div>
             </div>
             
             <table class="comparison-table">
                 <tr>
-                    <td class="stat-value {% if driver1.age < driver2.age %}better{% endif %}">
-                        {{ driver1.age }}
+                    <td class="stat-value {% if team1.year_founded < team2.year_founded %}better{% endif %}">
+                        {{ team1.year_founded }}
                     </td>
-                    <td class="stat-name">Age</td>
-                    <td class="stat-value {% if driver2.age < driver1.age %}better{% endif %}">
-                        {{ driver2.age }}
+                    <td class="stat-name">Year Founded</td>
+                    <td class="stat-value {% if team2.year_founded < team1.year_founded %}better{% endif %}">
+                        {{ team2.year_founded }}
                     </td>
                 </tr>
                 <tr>
-                    <td class="stat-value {% if driver1.total_pole_positions > driver2.total_pole_positions %}better{% endif %}">
-                        {{ driver1.total_pole_positions }}
+                    <td class="stat-value {% if team1.total_pole_positions > team2.total_pole_positions %}better{% endif %}">
+                        {{ team1.total_pole_positions }}
                     </td>
                     <td class="stat-name">Pole Positions</td>
-                    <td class="stat-value {% if driver2.total_pole_positions > driver1.total_pole_positions %}better{% endif %}">
-                        {{ driver2.total_pole_positions }}
+                    <td class="stat-value {% if team2.total_pole_positions > team1.total_pole_positions %}better{% endif %}">
+                        {{ team2.total_pole_positions }}
                     </td>
                 </tr>
                 <tr>
-                    <td class="stat-value {% if driver1.total_race_wins > driver2.total_race_wins %}better{% endif %}">
-                        {{ driver1.total_race_wins }}
+                    <td class="stat-value {% if team1.total_race_wins > team2.total_race_wins %}better{% endif %}">
+                        {{ team1.total_race_wins }}
                     </td>
                     <td class="stat-name">Race Wins</td>
-                    <td class="stat-value {% if driver2.total_race_wins > driver1.total_race_wins %}better{% endif %}">
-                        {{ driver2.total_race_wins }}
+                    <td class="stat-value {% if team2.total_race_wins > team1.total_race_wins %}better{% endif %}">
+                        {{ team2.total_race_wins }}
                     </td>
                 </tr>
                 <tr>
-                    <td class="stat-value {% if driver1.total_points_scored > driver2.total_points_scored %}better{% endif %}">
-                        {{ driver1.total_points_scored }}
+                    <td class="stat-value {% if team1.total_constructor_titles > team2.total_constructor_titles %}better{% endif %}">
+                        {{ team1.total_constructor_titles }}
                     </td>
-                    <td class="stat-name">Points Scored</td>
-                    <td class="stat-value {% if driver2.total_points_scored > driver1.total_points_scored %}better{% endif %}">
-                        {{ driver2.total_points_scored }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="stat-value {% if driver1.total_world_titles > driver2.total_world_titles %}better{% endif %}">
-                        {{ driver1.total_world_titles }}
-                    </td>
-                    <td class="stat-name">World Titles</td>
-                    <td class="stat-value {% if driver2.total_world_titles > driver1.total_world_titles %}better{% endif %}">
-                        {{ driver2.total_world_titles }}
+                    <td class="stat-name">Constructor Titles</td>
+                    <td class="stat-value {% if team2.total_constructor_titles > team1.total_constructor_titles %}better{% endif %}">
+                        {{ team2.total_constructor_titles }}
                     </td>
                 </tr>
                 <tr>
-                    <td class="stat-value {% if driver1.total_fastest_laps > driver2.total_fastest_laps %}better{% endif %}">
-                        {{ driver1.total_fastest_laps }}
+                    <td class="stat-value {% if team1.previous_season_position < team2.previous_season_position %}better{% endif %}">
+                        {{ team1.previous_season_position }}
                     </td>
-                    <td class="stat-name">Fastest Laps</td>
-                    <td class="stat-value {% if driver2.total_fastest_laps > driver1.total_fastest_laps %}better{% endif %}">
-                        {{ driver2.total_fastest_laps }}
+                    <td class="stat-name">Previous Season Position</td>
+                    <td class="stat-value {% if team2.previous_season_position < team1.previous_season_position %}better{% endif %}">
+                        {{ team2.previous_season_position }}
                     </td>
                 </tr>
             </table>
             
+            <div class="drivers-section">
+                <div class="comparison-header">
+                    <div class="team-header">
+                        <h3 class="section-title">Drivers</h3>
+                        {% if team1_drivers %}
+                        <ul class="driver-list">
+                            {% for driver in team1_drivers %}
+                            <li class="driver-item">
+                                <a href="/driver/{{ driver.id }}" class="driver-link">{{ driver.name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="no-drivers">No drivers currently</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="vs-column"></div>
+                    
+                    <div class="team-header">
+                        <h3 class="section-title">Drivers</h3>
+                        {% if team2_drivers %}
+                        <ul class="driver-list">
+                            {% for driver in team2_drivers %}
+                            <li class="driver-item">
+                                <a href="/driver/{{ driver.id }}" class="driver-link">{{ driver.name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="no-drivers">No drivers currently</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
             <div class="compare-again">
-                <a href="/compare-drivers" class="compare-button">
-                    <i class="fas fa-sync-alt"></i> Compare Different Drivers
+                <a href="/compare-teams" class="compare-button">
+                    <i class="fas fa-sync-alt"></i> Compare Different Teams
                 </a>
             </div>
         </div>

@@ -1029,3 +1029,89 @@ async def process_driver_comparison(
         'team2': team2,
         'drivers': all_drivers
     })
+
+# Routes for comparing teams
+@app.get("/compare-teams", response_class=HTMLResponse)
+async def compare_teams_form(request: Request):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    all_teams = get_all_teams()
+    
+    return templates.TemplateResponse('compare_teams.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'teams': all_teams
+    })
+
+@app.post("/compare-teams", response_class=HTMLResponse)
+async def process_team_comparison(
+    request: Request,
+    team1_id: str = Form(...),
+    team2_id: str = Form(...)
+):
+    id_token = request.cookies.get("token")
+    error_message = None
+    user_token = None
+    team1 = None
+    team2 = None
+    team1_drivers = []
+    team2_drivers = []
+
+    if id_token:
+        try:
+            user_token = google.oauth2.id_token.verify_firebase_token(id_token, firebase_request_adapter)
+        except ValueError as err:
+            print(str(err))
+            error_message = str(err)
+    
+    try:
+        team1_doc = teams_ref.document(team1_id).get()
+        if team1_doc.exists:
+            team1 = team1_doc.to_dict()
+            team1['id'] = team1_id
+            
+            team1_drivers_query = drivers_ref.where('team_id', '==', team1_id).stream()
+            for driver_doc in team1_drivers_query:
+                driver_data = driver_doc.to_dict()
+                driver_data['id'] = driver_doc.id
+                team1_drivers.append(driver_data)
+        
+        team2_doc = teams_ref.document(team2_id).get()
+        if team2_doc.exists:
+            team2 = team2_doc.to_dict()
+            team2['id'] = team2_id
+            
+            team2_drivers_query = drivers_ref.where('team_id', '==', team2_id).stream()
+            for driver_doc in team2_drivers_query:
+                driver_data = driver_doc.to_dict()
+                driver_data['id'] = driver_doc.id
+                team2_drivers.append(driver_data)
+        
+        if not team1 or not team2:
+            error_message = "One or both teams not found"
+            
+    except Exception as e:
+        error_message = f"Error retrieving team details: {str(e)}"
+    
+    all_teams = get_all_teams()
+    
+    return templates.TemplateResponse('team_comparison_results.html', {
+        'request': request,
+        'user_token': user_token,
+        'error_message': error_message,
+        'team1': team1,
+        'team2': team2,
+        'team1_drivers': team1_drivers,
+        'team2_drivers': team2_drivers,
+        'teams': all_teams
+    })

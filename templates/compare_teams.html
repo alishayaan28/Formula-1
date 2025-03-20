@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compare Teams</title>
+    <script type="module" src="{{ url_for('static', path='/firebase-login.js') }}"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /*Header*/
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #1a237e, #283593, #303f9f);
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #303f9f;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-email {
+            font-weight: 500;
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /*Navigation*/
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 8px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100px;
+            height: 50px;
+            justify-content: center;
+        }
+        
+        .nav-link i {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        #sign-out {
+            background-color: rgba(234, 67, 53, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        #sign-out:hover {
+            background-color: #ea4335;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+        
+        .page-title {
+            color: #4285f4;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 24px;
+        }
+        
+        .form-row {
+            margin-bottom: 25px;
+        }
+        
+        .form-row label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .form-row select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-color: white;
+        }
+        
+        .form-row select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .vs-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .vs-separator:before, .vs-separator:after {
+            content: '';
+            height: 1px;
+            background-color: #ddd;
+            flex: 1;
+        }
+        
+        .vs-text {
+            margin: 0 15px;
+            font-weight: 600;
+            color: #666;
+            background-color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .compare-button {
+            background-color: #4285f4;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+            margin: 10px auto;
+            display: block;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .compare-button:hover {
+            background-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="header-bar" id="user-header">
+        <div class="user-section">
+            <div class="user-avatar">
+                {% if user_token and user_token.email %}
+                {{ user_token.email[0] | upper }}
+                {% else %}
+                M
+                {% endif %}
+            </div>
+            <p class="user-email" id="user-email-display">
+                {% if user_token and user_token.email %}
+                {{ user_token.email }}
+                {% else %}
+                masood@gmail.com
+                {% endif %}
+            </p>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="/add-driver" class="nav-link">
+                <i class="fas fa-user-plus"></i>
+                Driver
+            </a>
+            <a href="/add-team" class="nav-link">
+                <i class="fas fa-users"></i>
+                Team
+            </a>
+            <a href="/query-drivers" class="nav-link">
+                <i class="fas fa-search"></i>
+                Query Drivers
+            </a>
+            <a href="/query-teams" class="nav-link">
+                <i class="fas fa-search"></i>
+                Query Teams
+            </a>
+            <a href="/compare-drivers" class="nav-link">
+                <i class="fas fa-balance-scale"></i>
+                Compare Drivers
+            </a>
+            <a href="/compare-teams" class="nav-link">
+                <i class="fas fa-trophy"></i>
+                Compare Teams
+            </a>
+        </div>
+        <button id="sign-out">
+            <i class="fas fa-sign-out-alt"></i> Sign out
+        </button>
+    </div>
+    
+    <div class="content-area">
+        <h2 class="page-title">Compare Teams</h2>
+        
+        {% if error_message %}
+        <div class="error-message">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="/compare-teams">
+            <div class="form-row">
+                <label for="team1_id">First Team</label>
+                <select id="team1_id" name="team1_id" required>
+                    <option value="">-- Select First Team --</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}">{{ team.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="vs-separator">
+                <span class="vs-text">VS</span>
+            </div>
+            
+            <div class="form-row">
+                <label for="team2_id">Second Team</label>
+                <select id="team2_id" name="team2_id" required>
+                    <option value="">-- Select Second Team --</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}">{{ team.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="compare-button">Compare</button>
+        </form>
+    </div>
+
+    <script>
+        // Sign out
+        var signOutButton = document.getElementById("sign-out");
+        if (signOutButton) {
+            signOutButton.addEventListener("click", function() {
+                if (typeof signOut === 'function') {
+                    signOut();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
