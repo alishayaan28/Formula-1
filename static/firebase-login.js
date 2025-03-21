@@ -13,7 +13,7 @@ const firebaseConfig = {
     appId: "1:618606676328:web:a8fc6871599a35f9576edd"
   };
 
- // Declare Firebase app and auth globally
+// Declare Firebase app and auth globally
 let auth;
 let registeredUsers = {};
 
@@ -23,7 +23,6 @@ window.addEventListener("load", function() {
     updateUI(document.cookie);
     console.log("hello world load");
 
-    // Load registered users from localStorage if available (for validation)
     try {
         const storedUsers = localStorage.getItem('registeredUsers');
         if (storedUsers) {
@@ -37,8 +36,25 @@ window.addEventListener("load", function() {
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     
-    // Only proceed with validation setup if the inputs exist
     if (emailInput && passwordInput) {
+        if (!document.getElementById("global-error-message")) {
+            const errorMessageDiv = document.createElement("div");
+            errorMessageDiv.id = "global-error-message";
+            errorMessageDiv.style.color = "red";
+            errorMessageDiv.style.fontWeight = "bold";
+            errorMessageDiv.style.padding = "10px";
+            errorMessageDiv.style.margin = "10px 0";
+            errorMessageDiv.style.display = "none";
+            errorMessageDiv.style.backgroundColor = "#ffebee";
+            errorMessageDiv.style.borderRadius = "4px";
+            errorMessageDiv.style.textAlign = "center";
+            
+            const loginBox = document.getElementById("login-box");
+            if (loginBox) {
+                loginBox.insertBefore(errorMessageDiv, loginBox.firstChild);
+            }
+        }
+        
         // Add error message for email(@) elements if they don't exist
         if (!document.getElementById("email-error")) {
             const emailErrorDiv = document.createElement("div");
@@ -99,27 +115,53 @@ window.addEventListener("load", function() {
                 return true;
             }
         }
+
+        function showGlobalError(message) {
+            const errorDiv = document.getElementById("global-error-message");
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = "block";
+            }
+        }
+
+        function hideGlobalError() {
+            const errorDiv = document.getElementById("global-error-message");
+            if (errorDiv) {
+                errorDiv.style.display = "none";
+            }
+        }
         
         emailInput.addEventListener("input", function() {
-            validateEmail(this.value);
+            const errorDiv = document.getElementById("global-error-message");
+            if (errorDiv) errorDiv.style.display = 'none';
+            
+            const signUpButton = document.getElementById("sign-up");
+            if (signUpButton && signUpButton === document.activeElement) {
+                validateEmail(this.value);
+            }
         });
         
         passwordInput.addEventListener("input", function() {
-            validatePassword(this.value);
+            const errorDiv = document.getElementById("global-error-message");
+            if (errorDiv) errorDiv.style.display = 'none';
+            
+            const signUpButton = document.getElementById("sign-up");
+            if (signUpButton && signUpButton === document.activeElement) {
+                validatePassword(this.value);
+            }
         });
 
         // Signup of a new user to Firebase
         const signUpButton = document.getElementById("sign-up");
         if (signUpButton) {
             const originalSignUp = signUpButton.onclick;
-            signUpButton.onclick = null; // Remove original listener
+            signUpButton.onclick = null;
             
             signUpButton.addEventListener("click", function() {
                 const email = document.getElementById("email").value;
                 const password = document.getElementById("password").value;
-                const notRegisteredError = document.getElementById("not-registered-error");
                 
-                if (notRegisteredError) notRegisteredError.style.display = 'none';
+                hideGlobalError();
                 
                 const isEmailValid = validateEmail(email);
                 const isPasswordValid = validatePassword(password);
@@ -128,7 +170,6 @@ window.addEventListener("load", function() {
                     return;
                 }
 
-                // Store user in our local validation system
                 registeredUsers[email] = true;
                 try {
                     localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
@@ -136,13 +177,10 @@ window.addEventListener("load", function() {
                     console.error("Error storing registered users:", e);
                 }
 
-                // Proceed with Firebase signup
                 createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    // User created
                     const user = userCredential.user;
 
-                    // Get ID token and store in cookie
                     user.getIdToken().then((token) => {
                         document.cookie = "token=" + token + ";path=/;SameSite=Strict";
                         window.location = "/";
@@ -152,11 +190,9 @@ window.addEventListener("load", function() {
                     console.log(error.code + " " + error.message);
                     
                     if (error.code === "auth/email-already-in-use") {
-                        const emailError = document.getElementById("email-error");
-                        if (emailError) {
-                            emailError.innerText = "Email is already in use";
-                            emailError.style.display = 'block';
-                        }
+                        showGlobalError("Email is already in use");
+                    } else {
+                        showGlobalError("Signup error: " + error.message);
                     }
                 });
             });
@@ -171,45 +207,44 @@ window.addEventListener("load", function() {
             loginButton.addEventListener("click", function() {
                 const email = document.getElementById("email").value;
                 const password = document.getElementById("password").value;
-                const notRegisteredError = document.getElementById("not-registered-error");
                 
-                const isEmailValid = validateEmail(email);
-                const isPasswordValid = validatePassword(password);
+            
+                hideGlobalError();
                 
-                if (!isEmailValid || !isPasswordValid) {
-                    return; // Stop if validation fails
+                if (!email) {
+                    showGlobalError("Please enter your email");
+                    return;
                 }
                 
-                // Check if user is registered
-                if (!registeredUsers[email]) {
-                    if (notRegisteredError) notRegisteredError.style.display = 'block';
-                    return; // Stop if user is not registered
+                if (!password) {
+                    showGlobalError("Please enter your password");
+                    return;
                 }
 
                 signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     // User logged in
                     const user = userCredential.user;
-                    if (notRegisteredError) notRegisteredError.style.display = 'none';
                     console.log("logged in");
 
-                    // Get ID token and store in cookie
                     user.getIdToken().then((token) => {
                         document.cookie = "token=" + token + ";path=/;SameSite=Strict";
                         window.location = "/";
                     });
                 })
                 .catch((error) => {
-                    console.log(error.code + " " + error.message);
+                    console.log("Login error:", error.code, error.message);
                     
                     if (error.code === "auth/user-not-found") {
-                        if (notRegisteredError) notRegisteredError.style.display = 'block';
+                        showGlobalError("User not found. Please check your email or sign up.");
                     } else if (error.code === "auth/wrong-password") {
-                        const passwordError = document.getElementById("password-error");
-                        if (passwordError) {
-                            passwordError.innerText = "Incorrect password";
-                            passwordError.style.display = 'block';
-                        }
+                        showGlobalError("Incorrect password. Please try again.");
+                    } else if (error.code === "auth/invalid-email") {
+                        showGlobalError("Invalid email format. Please try again.");
+                    } else if (error.code === "auth/too-many-requests") {
+                        showGlobalError("Too many failed login attempts. Please try again later.");
+                    } else {
+                        showGlobalError("Login failed: " + error.message);
                     }
                 });
             });
