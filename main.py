@@ -152,7 +152,6 @@ def driver_name_exists(name: str) -> bool:
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    # Retrieve the token from cookies
     id_token = request.cookies.get("token")
     error_message = "No error here"
     user_token = None
