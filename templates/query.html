@@ -328,7 +328,7 @@
 <body>
 
     {% if user_token %}
-    <!--logged-in users-->
+    <!--For logged-in user-->
     <div class="header-bar" id="user-header">
         <div class="user-section">
             <div class="user-avatar">
@@ -368,7 +368,7 @@
         </button>
     </div>
     {% else %}
-    <!--logged out users-->
+    <!--For logged out user-->
     <div class="header-bar">
         <div class="title-section">
             <h1 class="site-title">Formula 1 Database</h1>
@@ -499,7 +499,6 @@
                         {% for driver in results %}
                         <tr>
                             <td>
-                                <!--Hyperlink-->
                                 <a href="/driver/{{ driver.id }}" class="driver-link">{{ driver.name }}</a>
                             </td>
                             <td>{{ driver.age }}</td>

@@ -143,7 +143,7 @@ function setupErrorMessages() {
         }
     }
     
-    // Add error message for email(@) elements if they don't exist
+    // Add error message for email(@) elements if they donot exist
     if (!document.getElementById("email-error")) {
         const emailInput = document.getElementById("email");
         const emailErrorDiv = document.createElement("div");

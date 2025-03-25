@@ -385,7 +385,6 @@
 </head>
 <body>
     {% if user_token %}
-    <!-- Header bar for signed-in user - only shown when user_token exists -->
     <div class="header-bar" id="user-header">
         <div class="user-section">
             <div class="user-avatar">
@@ -478,7 +477,6 @@
         </div>
     </div>
     
-    <!-- Show error message if it exists -->
     {% if error_message %}
     <div class="error-display">{{ error_message }}</div>
     {% endif %}
