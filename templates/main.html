@@ -380,6 +380,32 @@
         .action-card:nth-child(5) .action-button:hover {
             box-shadow: 0 6px 15px rgba(66, 133, 244, 0.4);
         }
+        .content-area {
+             position: relative;
+            }
+        .top-navigation {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                z-index: 10;
+            }
+        .top-navigation .nav-links {
+                display: flex;
+                gap: 5px;
+            }
+        .top-navigation .nav-link {
+                  color: white;
+                   text-decoration: none;
+                    font-weight: 500;
+                     background-color: #4285f4;
+                     padding: 8px 15px;
+                    border-radius: 5px;
+                    transition: all 0.3s ease;
+                    }
+        .top-navigation .nav-link:hover {
+             background-color: #4285f4;
+             transform: translateY(-2px);
+            }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -483,6 +509,17 @@
     
     {% else %}
     <!--Login form-->
+    <div class="content-area">
+        <div class="top-navigation">
+            <div class="nav-links">
+                <a href="/query-drivers" class="nav-link">
+                    <i class="fas fa-search"></i> Query Drivers
+                </a>
+                <a href="/query-teams" class="nav-link">
+                    <i class="fas fa-search"></i> Query Teams
+                </a>
+            </div>
+        </div>
     <div class="content-area">
         <div id="login-box">
             <h2 class="login-title">Login/SignUp</h2>
