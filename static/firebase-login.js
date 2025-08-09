@@ -5,14 +5,14 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBePS_23a796sFO2kZLbTTPbKnvc-WV-dk",
-    authDomain: "soft-support.firebaseapp.com",
-    databaseURL: "https://soft-support-default-rtdb.firebaseio.com",
-    projectId: "soft-support",
-    storageBucket: "soft-support.appspot.com",
-    messagingSenderId: "1068533196490",
-    appId: "1:1068533196490:web:c42e7504f4b53cec28b633",
-    measurementId: "G-NETRHZQC8C"
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: "",
+    measurementId: ""
   };
 
 // Declare Firebase app and auth globally
